@@ -1,0 +1,11 @@
+{
+  "name": "OpenVEIL",
+  "version": "7.0.0",
+  "description": "OpenVEIL Addon for Node.js",
+  "main": "build/Release/OpenVEIL.node",
+  "private": true,
+  "gypfile": true,
+  "dependencies": {
+    "bindings": "~1.2.1"
+  }
+}
