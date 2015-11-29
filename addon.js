@@ -1,6 +1,9 @@
 var addon = require('bindings')('OpenVEIL');
 
-var obj = new addon.OpenVEIL();
+console.log(addon);
+var obj = new addon.KeyVEILConnector();
+
+console.log(obj);
 
 console.log( obj.isConnected() );
 obj.disconnect();

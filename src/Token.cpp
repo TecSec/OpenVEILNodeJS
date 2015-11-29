@@ -28,13 +28,38 @@
 //	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <node.h>
-#include "OpenVEILAddon.h"
+#include "Token.h"
+#include "Session.h"
 
 using namespace v8;
 
-void InitAll(Handle<Object> exports) {
-  OpenVEILAddon::Init(exports);
+//Persistent<Function> Token::constructor;
+
+Token::Token() {
 }
 
-NODE_MODULE(OpenVEIL, InitAll)
+Token::~Token() {
+}
+
+static tsAscii StringToTsAscii(v8::Local<v8::String>& string)
+{
+	tsAscii tmp;
+	const int length = string->Utf8Length() + 1;  // Add one for trailing zero byte.
+	tmp.resize(length);
+	string->WriteOneByte((uint8_t*)tmp.rawData(), /* start */ 0, length);
+	return tmp;
+}
+
+Nan::NAN_METHOD_RETURN_TYPE Token::OpenSession(Nan::NAN_METHOD_ARGS_TYPE info)
+{
+	Token* obj = ObjectWrap::Unwrap<Token>(info.This());
+
+	std::shared_ptr<IKeyVEILSession> sessionPtr = obj->handle()->openSession();
+
+	v8::Local<v8::Function> cons = Nan::New(Session::constructor());
+	v8::Local<v8::Object> sessObj = Nan::NewInstance(cons).ToLocalChecked();
+	Session* sess = ObjectWrap::Unwrap<Session>(sessObj);
+	sess->handle(sessionPtr);
+	info.GetReturnValue().Set(sessObj);
+}
+

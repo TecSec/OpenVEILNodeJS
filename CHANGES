@@ -1,1 +1,6 @@
 Initial release of the Node.JS language bindings to OpenVEIL (7.0.18)
+
+11/27/2015 - Changed to use cmake-js
+	npm install -g cmake-js
+	cmake-js configure
+	
