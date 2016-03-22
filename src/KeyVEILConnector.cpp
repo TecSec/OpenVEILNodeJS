@@ -263,3 +263,63 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::FavoriteForEnterprise(Nan::NAN_MET
 	fav->handle(favPtr);
 	info.GetReturnValue().Set(favObj);
 }
+
+tsAscii KeyVEILConnector::createFavorite(Token* token, const tsData& headerData, const tsAscii& name)
+{
+	if (!isReady())
+		return "";
+	return ToString()(_value->CreateFavorite(token->handle(), headerData, name));
+}
+Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_token(Nan::NAN_METHOD_ARGS_TYPE info)
+{
+	KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
+	if (info.Length() < 3 || !info[0]->IsObject() || !info[1]->IsObject())
+	{
+		Nan::ThrowTypeError("Wrong number of arguments");
+		return;
+	}
+	auto tokObj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+	auto headerData = Nan::To<v8::Object>(info[1]).ToLocalChecked();
+	auto name = Nan::To<v8::String>(info[2]).ToLocalChecked();
+
+	Token* tok = ObjectWrap::Unwrap<Token>(tokObj);
+
+	char* content = node::Buffer::Data(headerData);
+	int contentlength = node::Buffer::Length(headerData);
+
+	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tok, tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
+}
+Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_serial(Nan::NAN_METHOD_ARGS_TYPE info)
+{
+	KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
+	if (info.Length() < 3 || !info[1]->IsObject())
+	{
+		Nan::ThrowTypeError("Wrong number of arguments");
+		return;
+	}
+	auto serial = Nan::To<v8::String>(info[0]).ToLocalChecked();
+	auto headerData = Nan::To<v8::Object>(info[1]).ToLocalChecked();
+	auto name = Nan::To<v8::String>(info[2]).ToLocalChecked();
+
+	char* content = node::Buffer::Data(headerData);
+	int contentlength = node::Buffer::Length(headerData);
+
+	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tsAscii(*Nan::Utf8String(serial)).HexToData(), tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
+}
+Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_id(Nan::NAN_METHOD_ARGS_TYPE info)
+{
+	KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
+	if (info.Length() < 3 || !info[1]->IsObject())
+	{
+		Nan::ThrowTypeError("Wrong number of arguments");
+		return;
+	}
+	auto id = Nan::To<v8::String>(info[0]).ToLocalChecked();
+	auto headerData = Nan::To<v8::Object>(info[1]).ToLocalChecked();
+	auto name = Nan::To<v8::String>(info[2]).ToLocalChecked();
+
+	char* content = node::Buffer::Data(headerData);
+	int contentlength = node::Buffer::Length(headerData);
+
+	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tsAscii(*Nan::Utf8String(id)), tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
+}

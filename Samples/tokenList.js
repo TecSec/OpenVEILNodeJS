@@ -1,4 +1,4 @@
-var addon = require('../OpenVEIL'),
+var addon = require('../build/Release/OpenVEIL'),
     kvConn = new addon.KeyVEILConnector(),
     token,
     fav,

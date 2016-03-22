@@ -34,6 +34,8 @@
 #include "OpenVEIL.h"
 #include <nan.h>
 
+class Token;
+
 class KeyVEILConnector : public Nan::ObjectWrap
 {
 public:
@@ -169,12 +171,7 @@ private:
 			return 0;
 		return _value->favoriteCount();
 	}
-	tsAscii createFavorite(Token* token, const tsData& headerData, const tsAscii& name)
-	{
-		if (!isReady())
-			return "";
-		return ToString()(_value->CreateFavorite(token->handle(), headerData, name));
-	}
+	tsAscii createFavorite(Token* token, const tsData& headerData, const tsAscii& name);
 	tsAscii createFavorite(const tsAscii& tokenId, const tsData& headerData, const tsAscii& name)
 	{
 		if (!isReady())
@@ -349,63 +346,9 @@ private:
 	static NAN_METHOD(FavoriteByIndex);
 	static NAN_METHOD(FavoriteByName);
 	static NAN_METHOD(FavoriteById);
-	static NAN_METHOD(CreateFavorite_token)
-	{
-		KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
-		if (info.Length() < 3 || !info[0]->IsObject() || !info[1]->IsObject())
-		{
-			Nan::ThrowTypeError("Wrong number of arguments");
-			return;
-		}
-		auto tokObj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
-		auto headerData = Nan::To<v8::Object>(info[1]).ToLocalChecked();
-		auto name = Nan::To<v8::String>(info[2]).ToLocalChecked();
-
-		Token* tok = ObjectWrap::Unwrap<Token>(info[0]);
-
-		char* content = node::Buffer::Data(headerData);
-		int contentlength = node::Buffer::Length(headerData);
-
-		info.GetReturnValue().Set(Nan::New(obj->createFavorite(tok, tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
-	}
-	static NAN_METHOD(CreateFavorite_serial)
-	{
-		KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
-		if (info.Length() < 3 || !info[1]->IsObject())
-		{
-			Nan::ThrowTypeError("Wrong number of arguments");
-			return;
-		}
-		auto serial = Nan::To<v8::String>(info[0]).ToLocalChecked();
-		auto headerData = Nan::To<v8::Object>(info[1]).ToLocalChecked();
-		auto name = Nan::To<v8::String>(info[2]).ToLocalChecked();
-
-		Token* tok = ObjectWrap::Unwrap<Token>(info[0]);
-
-		char* content = node::Buffer::Data(headerData);
-		int contentlength = node::Buffer::Length(headerData);
-
-		info.GetReturnValue().Set(Nan::New(obj->createFavorite(tsAscii(*Nan::Utf8String(serial)).HexToData(), tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
-	}
-	static NAN_METHOD(CreateFavorite_id)
-	{
-		KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
-		if (info.Length() < 3 || !info[1]->IsObject())
-		{
-			Nan::ThrowTypeError("Wrong number of arguments");
-			return;
-		}
-		auto id = Nan::To<v8::String>(info[0]).ToLocalChecked();
-		auto headerData = Nan::To<v8::Object>(info[1]).ToLocalChecked();
-		auto name = Nan::To<v8::String>(info[2]).ToLocalChecked();
-
-		Token* tok = ObjectWrap::Unwrap<Token>(info[0]);
-
-		char* content = node::Buffer::Data(headerData);
-		int contentlength = node::Buffer::Length(headerData);
-
-		info.GetReturnValue().Set(Nan::New(obj->createFavorite(tsAscii(*Nan::Utf8String(id)), tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
-	}
+	static NAN_METHOD(CreateFavorite_token);
+	static NAN_METHOD(CreateFavorite_serial);
+	static NAN_METHOD(CreateFavorite_id);
 	static NAN_METHOD(DeleteFavorite)
 	{
 		KeyVEILConnector* obj = ObjectWrap::Unwrap<KeyVEILConnector>(info.This());
