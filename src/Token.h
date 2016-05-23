@@ -31,7 +31,7 @@
 #ifndef __TOKEN_H__
 #define __TOKEN_H__
 
-#include "OpenVEIL.h"
+#include "VEIL.h"
 #include <nan.h>
 
 class Token : public Nan::ObjectWrap

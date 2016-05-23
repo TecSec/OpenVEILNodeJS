@@ -31,7 +31,7 @@
 #ifndef __GENERICCONNECTOR_H__
 #define __GENERICCONNECTOR_H__
 
-#include "OpenVEIL.h"
+#include "VEIL.h"
 #include <nan.h>
 
 class GenericConnector : public Nan::ObjectWrap

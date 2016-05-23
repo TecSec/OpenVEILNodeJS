@@ -31,7 +31,7 @@
 #ifndef __SESSION_H__
 #define __SESSION_H__
 
-#include "OpenVEIL.h"
+#include "VEIL.h"
 #include <nan.h>
 #include "Favorite.h"
 

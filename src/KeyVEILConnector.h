@@ -31,7 +31,7 @@
 #ifndef __KEYVEILCONNECTOR_H__
 #define __KEYVEILCONNECTOR_H__
 
-#include "OpenVEIL.h"
+#include "VEIL.h"
 #include <nan.h>
 
 class Token;

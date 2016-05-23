@@ -31,9 +31,9 @@
 #ifndef __FAVORITE_H__
 #define __FAVORITE_H__
 
-#include "OpenVEIL.h"
-#include "CmsHeader.h"
-#include "FileVEILSupport.h"
+#include "VEIL.h"
+#include "VEILCmsHeader.h"
+#include "VEILFileSupport.h"
 #include <nan.h>
 
 class Session;
