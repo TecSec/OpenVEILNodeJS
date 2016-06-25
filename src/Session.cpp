@@ -31,6 +31,7 @@
 #include "Session.h"
 
 using namespace v8;
+using namespace tscrypto;
 
 Session::Session() {
 }

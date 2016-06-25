@@ -86,7 +86,7 @@ private:
 	~KeyVEILConnector();
 
 	std::shared_ptr<IKeyVEILConnector> _value;
-	ConnectionStatus connect(const tsAscii& url, const tsAscii& username, const tsAscii& password)
+	ConnectionStatus connect(const tscrypto::tsCryptoString& url, const tscrypto::tsCryptoString& username, const tscrypto::tsCryptoString& password)
 	{
 		if (!isReady())
 		{
@@ -113,11 +113,11 @@ private:
 			return false;
 		}
 	}
-	bool sendJsonRequest(const tsAscii& verb, const tsAscii& cmd, const tsAscii& inData, tsAscii& outData, int& status)
+	bool sendJsonRequest(const tscrypto::tsCryptoString& verb, const tscrypto::tsCryptoString& cmd, const tscrypto::tsCryptoString& inData, tscrypto::tsCryptoString& outData, int& status)
 	{
 		if (isReady())
 		{
-			JSONObject inObj, outObj;
+			tscrypto::JSONObject inObj, outObj;
 
 			if (inObj.FromJSON(inData.c_str()) <= 0)
 				return false;
@@ -131,11 +131,11 @@ private:
 			return false;
 		}
 	}
-	bool sendRequest(const tsAscii& verb, const tsAscii& cmd, const tsAscii& inData, tsAscii& outData, int& status)
+	bool sendRequest(const tscrypto::tsCryptoString& verb, const tscrypto::tsCryptoString& cmd, const tscrypto::tsCryptoString& inData, tscrypto::tsCryptoString& outData, int& status)
 	{
 		if (isReady())
 		{
-			tsData inObj, outObj;
+			tscrypto::tsCryptoData inObj, outObj;
 
 			inObj = inData.Base64ToData();
 
@@ -171,44 +171,44 @@ private:
 			return 0;
 		return _value->favoriteCount();
 	}
-	tsAscii createFavorite(Token* token, const tsData& headerData, const tsAscii& name);
-	tsAscii createFavorite(const tsAscii& tokenId, const tsData& headerData, const tsAscii& name)
+	tscrypto::tsCryptoString createFavorite(Token* token, const tscrypto::tsCryptoData& headerData, const tscrypto::tsCryptoString& name);
+	tscrypto::tsCryptoString createFavorite(const tscrypto::tsCryptoString& tokenId, const tscrypto::tsCryptoData& headerData, const tscrypto::tsCryptoString& name)
 	{
 		if (!isReady())
 			return "";
 		return ToString()(_value->CreateFavorite(ToGuid()(tokenId), headerData, name));
 	}
-	tsAscii createFavorite(const tsData& tokenSerial, const tsData& headerData, const tsAscii& name)
+	tscrypto::tsCryptoString createFavorite(const tscrypto::tsCryptoData& tokenSerial, const tscrypto::tsCryptoData& headerData, const tscrypto::tsCryptoString& name)
 	{
 		if (!isReady())
 			return "";
 		return ToString()(_value->CreateFavorite(tokenSerial, headerData, name));
 	}
-	bool deleteFavorite(const tsAscii& id)
+	bool deleteFavorite(const tscrypto::tsCryptoString& id)
 	{
 		if (!isReady())
 			return false;
 		return _value->DeleteFavorite(ToGuid()(id));
 	}
-	bool updateFavoriteName(const tsAscii& id, const tsAscii& name)
+	bool updateFavoriteName(const tscrypto::tsCryptoString& id, const tscrypto::tsCryptoString& name)
 	{
 		if (!isReady())
 			return false;
 		return _value->UpdateFavoriteName(ToGuid()(id), name);
 	}
-	bool updateFavorite(const tsAscii& id, const tsData& setTo)
+	bool updateFavorite(const tscrypto::tsCryptoString& id, const tscrypto::tsCryptoData& setTo)
 	{
 		if (!isReady())
 			return false;
 		return _value->UpdateFavorite(ToGuid()(id), setTo);
 	}
-	size_t tokenCountForEnterpriseId(const tsAscii& enterpriseId)
+	size_t tokenCountForEnterpriseId(const tscrypto::tsCryptoString& enterpriseId)
 	{
 		if (!isReady())
 			return 0;
 		return _value->tokenCountForEnterprise(ToGuid()(enterpriseId));
 	}
-	size_t favoriteCountForEnterprise(const tsAscii& enterpriseId)
+	size_t favoriteCountForEnterprise(const tscrypto::tsCryptoString& enterpriseId)
 	{
 		if (!isReady())
 			return 0;
@@ -288,7 +288,7 @@ private:
 		auto cmd = Nan::To<v8::String>(info[1]).ToLocalChecked();
 		auto inData = Nan::To<v8::String>(info[2]).ToLocalChecked();
 
-		tsAscii outData;
+		tscrypto::tsCryptoString outData;
 		int status = 0;
 		bool retVal = obj->sendJsonRequest(*Nan::Utf8String(verb), *Nan::Utf8String(cmd), *Nan::Utf8String(inData), outData, status);
 
@@ -311,7 +311,7 @@ private:
 		auto cmd = Nan::To<v8::String>(info[1]).ToLocalChecked();
 		auto inData = Nan::To<v8::String>(info[2]).ToLocalChecked();
 
-		tsAscii outData;
+		tscrypto::tsCryptoString outData;
 		int status = 0;
 		bool retVal = obj->sendRequest(*Nan::Utf8String(verb), *Nan::Utf8String(cmd), *Nan::Utf8String(inData), outData, status);
 
@@ -386,7 +386,7 @@ private:
 		char* content = node::Buffer::Data(data);
 		int contentlength = node::Buffer::Length(data);
 
-		info.GetReturnValue().Set(obj->updateFavorite(*Nan::Utf8String(id), tsData((uint8_t*)content, contentlength)));
+		info.GetReturnValue().Set(obj->updateFavorite(*Nan::Utf8String(id), tscrypto::tsCryptoData((uint8_t*)content, contentlength)));
 	}
 	static NAN_METHOD(TokenCountForEnterpriseId)
 	{

@@ -80,55 +80,55 @@ private:
 		_value.reset();
 	}
 
-	tsAscii getTokenName()
+	tscrypto::tsCryptoString getTokenName()
 	{
 		if (!isReady())
 			return "";
 		return _value->tokenName();
 	}
-	void setTokenName(const tsAscii& setTo)
+	void setTokenName(const tscrypto::tsCryptoString& setTo)
 	{
 		if (!isReady())
 			return;
 		_value->tokenName(setTo);
 	}
-	tsData serialNumber()
+	tscrypto::tsCryptoData serialNumber()
 	{
 		if (!isReady())
-			return tsData();
+			return tscrypto::tsCryptoData();
 		return _value->serialNumber();
 	}
-	tsAscii id()
+	tscrypto::tsCryptoString id()
 	{
 		if (!isReady())
 			return "";
 		return ToString()(_value->id());
 	}
-	tsAscii enterpriseName()
+	tscrypto::tsCryptoString enterpriseName()
 	{
 		if (!isReady())
 			return "";
 		return _value->enterpriseName();
 	}
-	tsAscii memberName()
+	tscrypto::tsCryptoString memberName()
 	{
 		if (!isReady())
 			return "";
 		return _value->memberName();
 	}
-	tsAscii tokenType()
+	tscrypto::tsCryptoString tokenType()
 	{
 		if (!isReady())
 			return "";
 		return _value->tokenType();
 	}
-	tsAscii enterpriseId()
+	tscrypto::tsCryptoString enterpriseId()
 	{
 		if (!isReady())
 			return "";
 		return ToString()(_value->enterpriseId());
 	}
-	tsAscii memberId()
+	tscrypto::tsCryptoString memberId()
 	{
 		if (!isReady())
 			return "";

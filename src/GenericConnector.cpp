@@ -31,6 +31,7 @@
 #include "GenericConnector.h"
 
 using namespace v8;
+using namespace tscrypto;
 
 GenericConnector::GenericConnector() {
 	_value = ::ServiceLocator()->try_get_instance<IKeyVEILConnector>("/KeyVEILConnector");

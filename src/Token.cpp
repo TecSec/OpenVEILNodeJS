@@ -32,6 +32,7 @@
 #include "Session.h"
 
 using namespace v8;
+using namespace tscrypto;
 
 //Persistent<Function> Token::constructor;
 
@@ -41,9 +42,9 @@ Token::Token() {
 Token::~Token() {
 }
 
-static tsAscii StringToTsAscii(v8::Local<v8::String>& string)
+static tscrypto::tsCryptoString StringToTsAscii(v8::Local<v8::String>& string)
 {
-	tsAscii tmp;
+	tscrypto::tsCryptoString tmp;
 	const int length = string->Utf8Length() + 1;  // Add one for trailing zero byte.
 	tmp.resize(length);
 	string->WriteOneByte((uint8_t*)tmp.rawData(), /* start */ 0, length);

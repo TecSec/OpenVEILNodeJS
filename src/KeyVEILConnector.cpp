@@ -33,10 +33,11 @@
 #include "Token.h"
 
 using namespace v8;
+using namespace tscrypto;
 
-static tsAscii StringToTsAscii(v8::Local<v8::String>& string)
+static tscrypto::tsCryptoString StringToTsAscii(v8::Local<v8::String>& string)
 {
-	tsAscii tmp;
+	tscrypto::tsCryptoString tmp;
 	const int length = string->Utf8Length() + 1;  // Add one for trailing zero byte.
 	tmp.resize(length);
 	string->WriteOneByte((uint8_t*)tmp.rawData(), /* start */ 0, length);
@@ -84,7 +85,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::TokenByName(Nan::NAN_METHOD_ARGS_T
 	}
 	auto name = Nan::To<v8::String>(info[0]).ToLocalChecked();
 
-	std::shared_ptr<IToken> tokPtr = obj->_value->token(tsAscii(*Nan::Utf8String(name)));
+	std::shared_ptr<IToken> tokPtr = obj->_value->token(tscrypto::tsCryptoString(*Nan::Utf8String(name)));
 	if (!tokPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -107,7 +108,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::TokenBySerialNumber(Nan::NAN_METHO
 	}
 	auto serial = Nan::To<v8::String>(info[0]).ToLocalChecked();
 
-	std::shared_ptr<IToken> tokPtr = obj->_value->token(tsData(tsAscii(*Nan::Utf8String(serial)).HexToData()));
+	std::shared_ptr<IToken> tokPtr = obj->_value->token(tscrypto::tsCryptoData(tscrypto::tsCryptoString(*Nan::Utf8String(serial)).HexToData()));
 	if (!tokPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -130,7 +131,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::TokenById(Nan::NAN_METHOD_ARGS_TYP
 	}
 	auto id = Nan::To<v8::String>(info[0]).ToLocalChecked();
 
-	std::shared_ptr<IToken> tokPtr = obj->_value->token(ToGuid()(tsAscii(*Nan::Utf8String(id))));
+	std::shared_ptr<IToken> tokPtr = obj->_value->token(ToGuid()(tscrypto::tsCryptoString(*Nan::Utf8String(id))));
 	if (!tokPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -178,7 +179,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::FavoriteByName(Nan::NAN_METHOD_ARG
 	}
 	auto name = Nan::To<v8::String>(info[0]).ToLocalChecked();
 
-	std::shared_ptr<IFavorite> favPtr = obj->_value->favorite(tsAscii(*Nan::Utf8String(name)));
+	std::shared_ptr<IFavorite> favPtr = obj->_value->favorite(tscrypto::tsCryptoString(*Nan::Utf8String(name)));
 	if (!favPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -201,7 +202,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::FavoriteById(Nan::NAN_METHOD_ARGS_
 	}
 	auto id = Nan::To<v8::String>(info[0]).ToLocalChecked();
 
-	std::shared_ptr<IFavorite> favPtr = obj->_value->favorite(ToGuid()(tsAscii(*Nan::Utf8String(id))));
+	std::shared_ptr<IFavorite> favPtr = obj->_value->favorite(ToGuid()(tscrypto::tsCryptoString(*Nan::Utf8String(id))));
 	if (!favPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -225,7 +226,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::TokenForEnterprise(Nan::NAN_METHOD
 	auto id = Nan::To<v8::String>(info[0]).ToLocalChecked();
 	auto index = Nan::To<v8::Int32>(info[1]).ToLocalChecked();
 
-	std::shared_ptr<IToken> tokPtr = obj->_value->tokenForEnterprise(ToGuid()(tsAscii(*Nan::Utf8String(id))), index->Int32Value());
+	std::shared_ptr<IToken> tokPtr = obj->_value->tokenForEnterprise(ToGuid()(tscrypto::tsCryptoString(*Nan::Utf8String(id))), index->Int32Value());
 	if (!tokPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -250,7 +251,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::FavoriteForEnterprise(Nan::NAN_MET
 	auto id = Nan::To<v8::String>(info[0]).ToLocalChecked();
 	auto index = Nan::To<v8::Int32>(info[1]).ToLocalChecked();
 
-	std::shared_ptr<IFavorite> favPtr = obj->_value->favoriteForEnterprise(ToGuid()(tsAscii(*Nan::Utf8String(id))), index->Int32Value());
+	std::shared_ptr<IFavorite> favPtr = obj->_value->favoriteForEnterprise(ToGuid()(tscrypto::tsCryptoString(*Nan::Utf8String(id))), index->Int32Value());
 	if (!favPtr)
 	{
 		Nan::ThrowRangeError("Unable to retrieve that token");
@@ -264,7 +265,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::FavoriteForEnterprise(Nan::NAN_MET
 	info.GetReturnValue().Set(favObj);
 }
 
-tsAscii KeyVEILConnector::createFavorite(Token* token, const tsData& headerData, const tsAscii& name)
+tscrypto::tsCryptoString KeyVEILConnector::createFavorite(Token* token, const tscrypto::tsCryptoData& headerData, const tscrypto::tsCryptoString& name)
 {
 	if (!isReady())
 		return "";
@@ -287,7 +288,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_token(Nan::NAN_METH
 	char* content = node::Buffer::Data(headerData);
 	int contentlength = node::Buffer::Length(headerData);
 
-	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tok, tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
+	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tok, tscrypto::tsCryptoData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
 }
 Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_serial(Nan::NAN_METHOD_ARGS_TYPE info)
 {
@@ -304,7 +305,7 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_serial(Nan::NAN_MET
 	char* content = node::Buffer::Data(headerData);
 	int contentlength = node::Buffer::Length(headerData);
 
-	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tsAscii(*Nan::Utf8String(serial)).HexToData(), tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
+	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tscrypto::tsCryptoString(*Nan::Utf8String(serial)).HexToData(), tscrypto::tsCryptoData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
 }
 Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_id(Nan::NAN_METHOD_ARGS_TYPE info)
 {
@@ -321,5 +322,5 @@ Nan::NAN_METHOD_RETURN_TYPE KeyVEILConnector::CreateFavorite_id(Nan::NAN_METHOD_
 	char* content = node::Buffer::Data(headerData);
 	int contentlength = node::Buffer::Length(headerData);
 
-	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tsAscii(*Nan::Utf8String(id)), tsData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
+	info.GetReturnValue().Set(Nan::New(obj->createFavorite(tscrypto::tsCryptoString(*Nan::Utf8String(id)), tscrypto::tsCryptoData((uint8_t*)content, contentlength), *Nan::Utf8String(name)).c_str()).ToLocalChecked());
 }

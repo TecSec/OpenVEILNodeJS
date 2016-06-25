@@ -61,7 +61,7 @@ private:
 	~GenericConnector();
 
 	std::shared_ptr<IKeyVEILConnector> _value;
-	ConnectionStatus connect(const tsAscii& url, const tsAscii& username, const tsAscii& password)
+	ConnectionStatus connect(const tscrypto::tsCryptoString& url, const tscrypto::tsCryptoString& username, const tscrypto::tsCryptoString& password)
 	{
 		if (!isReady())
 		{
@@ -88,11 +88,11 @@ private:
 			return false;
 		}
 	}
-	bool sendJsonRequest(const tsAscii& verb, const tsAscii& cmd, const tsAscii& inData, tsAscii& outData, int& status)
+	bool sendJsonRequest(const tscrypto::tsCryptoString& verb, const tscrypto::tsCryptoString& cmd, const tscrypto::tsCryptoString& inData, tscrypto::tsCryptoString& outData, int& status)
 	{
 		if (isReady())
 		{
-			JSONObject inObj, outObj;
+			tscrypto::JSONObject inObj, outObj;
 
 			if (inObj.FromJSON(inData.c_str()) <= 0)
 				return false;
@@ -106,11 +106,11 @@ private:
 			return false;
 		}
 	}
-	bool sendRequest(const tsAscii& verb, const tsAscii& cmd, const tsAscii& inData, tsAscii& outData, int& status)
+	bool sendRequest(const tscrypto::tsCryptoString& verb, const tscrypto::tsCryptoString& cmd, const tscrypto::tsCryptoString& inData, tscrypto::tsCryptoString& outData, int& status)
 	{
 		if (isReady())
 		{
-			tsData inObj, outObj;
+			tscrypto::tsCryptoData inObj, outObj;
 
 			inObj = inData.Base64ToData();
 
@@ -202,7 +202,7 @@ private:
 		auto cmd = Nan::To<v8::String>(info[1]).ToLocalChecked();
 		auto inData = Nan::To<v8::String>(info[2]).ToLocalChecked();
 
-		tsAscii outData;
+		tscrypto::tsCryptoString outData;
 		int status = 0;
 		bool retVal = obj->sendJsonRequest(*Nan::Utf8String(verb), *Nan::Utf8String(cmd), *Nan::Utf8String(inData), outData, status);
 
@@ -225,7 +225,7 @@ private:
 		auto cmd = Nan::To<v8::String>(info[1]).ToLocalChecked();
 		auto inData = Nan::To<v8::String>(info[2]).ToLocalChecked();
 
-		tsAscii outData;
+		tscrypto::tsCryptoString outData;
 		int status = 0;
 		bool retVal = obj->sendRequest(*Nan::Utf8String(verb), *Nan::Utf8String(cmd), *Nan::Utf8String(inData), outData, status);
 

@@ -41,6 +41,7 @@ message(STATUS "OPENVEIL_INSTALL_LIB_DIR = ${OPENVEIL_INSTALL_LIB_DIR}")
 message(STATUS "OPENVEIL_INSTALL_SHLIB_DIR = ${OPENVEIL_INSTALL_SHLIB_DIR}")
 
 
+ImportTarget(VEILCryptoCore)
 ImportTarget(VEILCore)
 ImportTarget(VEILCmsHeader)
 ImportTarget(VEILFileSupport)
@@ -59,10 +60,11 @@ add_uninstall()
 
 add_library(OpenVEIL SHARED "src/KeyVEILConnector.cpp" "src/KeyVEILConnector.h" "src/GenericConnector.cpp" "src/GenericConnector.h" "src/Favorite.cpp" "src/Favorite.h" "src/Session.cpp" "src/Session.h" "src/Token.cpp" "src/Token.h" "src/addon.cc")
 set_target_properties(OpenVEIL PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(OpenVEIL ${CMAKE_JS_LIB} VEILCore VEILCmsHeader VEILFileSupport)
+target_link_libraries(OpenVEIL ${CMAKE_JS_LIB} VEILCryptoCore VEILCore VEILCmsHeader VEILFileSupport)
 
 summary()
 
+CopyImportTargetBinaries(VEILCryptoCore ${BIN_DIR})
 CopyImportTargetBinaries(VEILCore ${BIN_DIR})
 CopyImportTargetBinaries(VEILCmsHeader ${BIN_DIR})
 CopyImportTargetBinaries(VEILFileSupport ${BIN_DIR})

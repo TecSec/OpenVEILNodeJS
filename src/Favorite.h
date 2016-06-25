@@ -67,8 +67,8 @@ public:
 	std::shared_ptr<IFavorite> handle() { return _value; }
 	void handle(std::shared_ptr<IFavorite> val) { _value = val; }
 
-	bool encryptFile(Session* session, const tsAscii& sourceFile, bool compress, const tsAscii& encryptedFile);
-	tsData encryptData(Session* session, const tsData& sourceData, bool compress);
+	bool encryptFile(Session* session, const tscrypto::tsCryptoString& sourceFile, bool compress, const tscrypto::tsCryptoString& encryptedFile);
+	tscrypto::tsCryptoData encryptData(Session* session, const tscrypto::tsCryptoData& sourceData, bool compress);
 
 	static inline Nan::Persistent<v8::Function> & constructor() {
 		static Nan::Persistent<v8::Function> my_constructor;
@@ -86,70 +86,70 @@ private:
 		_value.reset();
 	}
 
-	tsAscii getFavoriteId()
+	tscrypto::tsCryptoString getFavoriteId()
 	{
 		if (!isReady())
 			return "";
 		else
 			return ToString()(_value->favoriteId());
 	}
-	void setFavoriteId(const tsAscii& setTo)
+	void setFavoriteId(const tscrypto::tsCryptoString& setTo)
 	{
 		if (!isReady())
 			return;
 		_value->favoriteId(ToGuid()(setTo));
 	}
 
-	tsAscii getEnterpriseId()
+	tscrypto::tsCryptoString getEnterpriseId()
 	{
 		if (!isReady())
 			return "";
 		else
 			return ToString()(_value->enterpriseId());
 	}
-	void setEnterpriseId(const tsAscii& setTo)
+	void setEnterpriseId(const tscrypto::tsCryptoString& setTo)
 	{
 		if (!isReady())
 			return;
 		_value->enterpriseId(ToGuid()(setTo));
 	}
 
-	tsAscii getFavoriteName()
+	tscrypto::tsCryptoString getFavoriteName()
 	{
 		if (!isReady())
 			return "";
 		else
 			return _value->favoriteName();
 	}
-	void setFavoriteName(const tsAscii& setTo)
+	void setFavoriteName(const tscrypto::tsCryptoString& setTo)
 	{
 		if (!isReady())
 			return;
 		_value->favoriteName(setTo);
 	}
 
-	tsData getTokenSerialNumber()
+	tscrypto::tsCryptoData getTokenSerialNumber()
 	{
 		if (!isReady())
 			return "";
 		else
 			return _value->tokenSerialNumber();
 	}
-	void setTokenSerialNumber(const tsData& setTo)
+	void setTokenSerialNumber(const tscrypto::tsCryptoData& setTo)
 	{
 		if (!isReady())
 			return;
 		_value->tokenSerialNumber(setTo);
 	}
 
-	tsData headerData()
+	tscrypto::tsCryptoData headerData()
 	{
 		if (!isReady())
 			return "";
 		else
 			return _value->headerData();
 	}
-	void headerData(const tsData& setTo)
+	void headerData(const tscrypto::tsCryptoData& setTo)
 	{
 		if (!isReady())
 			return;
@@ -227,7 +227,7 @@ private:
 	{
 		Favorite* obj = ObjectWrap::Unwrap<Favorite>(info.This());
 		auto serial = Nan::To<v8::String>(value).ToLocalChecked();
-		obj->setTokenSerialNumber(tsAscii(*Nan::Utf8String(serial)).HexToData());
+		obj->setTokenSerialNumber(tscrypto::tsCryptoString(*Nan::Utf8String(serial)).HexToData());
 	}
 	static NAN_GETTER(GetHeaderData)
 	{
@@ -238,7 +238,7 @@ private:
 	{
 		Favorite* obj = ObjectWrap::Unwrap<Favorite>(info.This());
 		auto data = Nan::To<v8::String>(value).ToLocalChecked();
-		obj->headerData(tsAscii(*Nan::Utf8String(data)).HexToData());
+		obj->headerData(tscrypto::tsCryptoString(*Nan::Utf8String(data)).HexToData());
 	}
 	static NAN_METHOD(Encrypt_File);
 	static NAN_METHOD(EncryptData);

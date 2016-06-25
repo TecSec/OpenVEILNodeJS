@@ -33,6 +33,7 @@
 #include <node.h>
 
 using namespace v8;
+using namespace tscrypto;
 
 Favorite::Favorite() {
 }
@@ -40,32 +41,32 @@ Favorite::Favorite() {
 Favorite::~Favorite() {
 }
 
-static tsAscii StringToTsAscii(v8::Local<v8::String>& string)
+static tscrypto::tsCryptoString StringToTsAscii(v8::Local<v8::String>& string)
 {
-	tsAscii tmp;
+	tscrypto::tsCryptoString tmp;
 	const int length = string->Utf8Length() + 1;  // Add one for trailing zero byte.
 	tmp.resize(length);
 	string->WriteOneByte((uint8_t*)tmp.rawData(), /* start */ 0, length);
 	return tmp;
 }
 
-bool Favorite::encryptFile(Session* session, const tsAscii& sourceFile, bool compress, const tsAscii& encryptedFile)
+bool Favorite::encryptFile(Session* session, const tscrypto::tsCryptoString& sourceFile, bool compress, const tscrypto::tsCryptoString& encryptedFile)
 {
 	std::shared_ptr<IFileVEILOperations> fileOps;
 	std::shared_ptr<ICmsHeader> header;
 	std::shared_ptr<IFileVEILOperationStatus> status;
-	tsAscii inputFile(sourceFile.c_str());
-	tsAscii outputFile(encryptedFile.c_str());
+	tscrypto::tsCryptoString inputFile(sourceFile.c_str());
+	tscrypto::tsCryptoString outputFile(encryptedFile.c_str());
 
 	if (!isReady())
-		throw tsAscii("Favorite not ready");
+		throw tscrypto::tsCryptoString("Favorite not ready");
 
 	if (!InitializeCmsHeader())
 		return false;
 
 	if (xp_GetFileAttributes(inputFile) == XP_INVALID_FILE_ATTRIBUTES || xp_IsDirectory(inputFile))
 	{
-		throw (tsAscii() << "File -> " << inputFile << " <- does not exist Encrypt operation aborted");
+		throw (tscrypto::tsCryptoString() << "File -> " << inputFile << " <- does not exist Encrypt operation aborted");
 	}
 
 	status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
@@ -74,7 +75,7 @@ bool Favorite::encryptFile(Session* session, const tsAscii& sourceFile, bool com
 		!(fileOps->SetStatusInterface(status)) ||
 		!(fileOps->SetSession(session->handle())))
 	{
-		throw tsAscii("An error occurred while building the file encryptor.  The CKM Runtime may be damaged.");
+		throw tscrypto::tsCryptoString("An error occurred while building the file encryptor.  The CKM Runtime may be damaged.");
 	}
 
 	// Create output file name based on the input file name
@@ -85,7 +86,7 @@ bool Favorite::encryptFile(Session* session, const tsAscii& sourceFile, bool com
 	}
 	if (!(header = ::ServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(handle()->headerData()))
 	{
-		throw tsAscii("An error occurred while building the encryption header.");
+		throw tscrypto::tsCryptoString("An error occurred while building the encryption header.");
 	}
 
 	// Indicate compression is desired.
@@ -97,37 +98,37 @@ bool Favorite::encryptFile(Session* session, const tsAscii& sourceFile, bool com
 	{
 		header->SetCompressionType(ct_None);
 	}
-	if (header->GetEncryptionAlgorithmID() == TS_ALG_INVALID)
-		header->SetEncryptionAlgorithmID(TS_ALG_AES_GCM_256);
+	if (header->GetEncryptionAlgorithmID() == _TS_ALG_ID::TS_ALG_INVALID)
+		header->SetEncryptionAlgorithmID(_TS_ALG_ID::TS_ALG_AES_GCM_256);
 
 	if (!(fileOps->EncryptFileAndStreams(inputFile.c_str(), outputFile.c_str(), header, compress ? ct_zLib : ct_None,
 		header->GetEncryptionAlgorithmID(), OIDtoID(header->GetDataHashOID().ToOIDString().c_str()),
 		header->HasHeaderSigningPublicKey(), true,
-		(Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_GCM ||
-			Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_CCM) ?
+		(Alg2Mode(header->GetEncryptionAlgorithmID()) == _SymmetricMode::CKM_SymMode_GCM ||
+			Alg2Mode(header->GetEncryptionAlgorithmID()) == _SymmetricMode::CKM_SymMode_CCM) ?
 		TS_FORMAT_CMS_ENC_AUTH : TS_FORMAT_CMS_CT_HASHED,
 		false, header->GetPaddingType(), 5000000)))
 	{
-		throw tsAscii("The encryption failed.");
+		throw tscrypto::tsCryptoString("The encryption failed.");
 		return false;
 	}
 
 	return true;
 }
-tsData Favorite::encryptData(Session* session, const tsData& sourceData, bool compress)
+tscrypto::tsCryptoData Favorite::encryptData(Session* session, const tscrypto::tsCryptoData& sourceData, bool compress)
 {
 	if (!isReady())
-		throw tsAscii("Favorite not ready");
+		throw tscrypto::tsCryptoString("Favorite not ready");
 
-	tsData encData;
+	tscrypto::tsCryptoData encData;
 
 	if (sourceData.size() == 0)
 	{
-		return tsData();
+		return tscrypto::tsCryptoData();
 	}
 
 	if (!InitializeCmsHeader())
-		return tsData();
+		return tscrypto::tsCryptoData();
 
 	std::shared_ptr<IFileVEILOperations> fileOps;
 	std::shared_ptr<IFileVEILOperationStatus> status;
@@ -135,7 +136,7 @@ tsData Favorite::encryptData(Session* session, const tsData& sourceData, bool co
 
 	if (!session->handle())
 	{
-		throw tsAscii("Session not ready");
+		throw tscrypto::tsCryptoString("Session not ready");
 	}
 
 	status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
@@ -144,16 +145,16 @@ tsData Favorite::encryptData(Session* session, const tsData& sourceData, bool co
 		!(fileOps->SetStatusInterface(status)) ||
 		!(fileOps->SetSession(session->handle())))
 	{
-		throw tsAscii("An error occurred while building the file encryptor.  The CKM Runtime may be damaged.");
+		throw tscrypto::tsCryptoString("An error occurred while building the file encryptor.  The CKM Runtime may be damaged.");
 	}
 	if (!(header = ::ServiceLocator()->get_instance<ICmsHeader>("/CmsHeader")) || !header->FromBytes(handle()->headerData()))
 	{
-		throw tsAscii("An error occurred while building the encryption header.");
+		throw tscrypto::tsCryptoString("An error occurred while building the encryption header.");
 	}
 
 	if (!header)
 	{
-		throw tsAscii("The favorite is invalid or incomplete.");
+		throw tscrypto::tsCryptoString("The favorite is invalid or incomplete.");
 	}
 
 	// Indicate compression is desired.
@@ -165,18 +166,18 @@ tsData Favorite::encryptData(Session* session, const tsData& sourceData, bool co
 	{
 		header->SetCompressionType(ct_None);
 	}
-	if (header->GetEncryptionAlgorithmID() == TS_ALG_INVALID)
-		header->SetEncryptionAlgorithmID(TS_ALG_AES_GCM_256);
+	if (header->GetEncryptionAlgorithmID() == _TS_ALG_ID::TS_ALG_INVALID)
+		header->SetEncryptionAlgorithmID(_TS_ALG_ID::TS_ALG_AES_GCM_256);
 
 	if (!(fileOps->EncryptCryptoData(sourceData, encData, header, compress ? ct_zLib : ct_None,
 		header->GetEncryptionAlgorithmID(), OIDtoID(header->GetDataHashOID().ToOIDString().c_str()),
 		header->HasHeaderSigningPublicKey(), true,
-		(Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_GCM ||
-			Alg2Mode(header->GetEncryptionAlgorithmID()) == CKM_SymMode_CCM) ?
+		(Alg2Mode(header->GetEncryptionAlgorithmID()) == _SymmetricMode::CKM_SymMode_GCM ||
+			Alg2Mode(header->GetEncryptionAlgorithmID()) == _SymmetricMode::CKM_SymMode_CCM) ?
 		TS_FORMAT_CMS_ENC_AUTH : TS_FORMAT_CMS_CT_HASHED,
 		false, header->GetPaddingType(), 5000000)))
 	{
-		throw tsAscii("Encryption failed.");
+		throw tscrypto::tsCryptoString("Encryption failed.");
 	}
 
 	return encData;
@@ -201,7 +202,7 @@ Nan::NAN_METHOD_RETURN_TYPE Favorite::Encrypt_File(Nan::NAN_METHOD_ARGS_TYPE inf
 		bool retVal = obj->encryptFile(session, *Nan::Utf8String(sourceFile), compress->BooleanValue(), *Nan::Utf8String(destFile));
 		info.GetReturnValue().Set(retVal);
 	}
-	catch (tsAscii& ex)
+	catch (tscrypto::tsCryptoString& ex)
 	{
 		Nan::ThrowError(ex.c_str());
 		return;
@@ -228,18 +229,18 @@ Nan::NAN_METHOD_RETURN_TYPE Favorite::EncryptData(Nan::NAN_METHOD_ARGS_TYPE info
 			char* content = node::Buffer::Data(sourceData);
 			int contentlength = node::Buffer::Length(sourceData);
 
-			tsData retVal = obj->encryptData(session, tsData((uint8_t*)content, contentlength), compress->BooleanValue());
+			tscrypto::tsCryptoData retVal = obj->encryptData(session, tscrypto::tsCryptoData((uint8_t*)content, contentlength), compress->BooleanValue());
 			info.GetReturnValue().Set(Nan::CopyBuffer((char*)retVal.c_str(), retVal.size()).ToLocalChecked());
 		}
 		else
 		{
 			auto sourceData = Nan::To<v8::String>(info[1]).ToLocalChecked();
 			auto compress = Nan::To<v8::Boolean>(info[2]).ToLocalChecked();
-			tsData retVal = obj->encryptData(session, tsAscii(*Nan::Utf8String(sourceData)).Base64ToData(), compress->BooleanValue());
+			tscrypto::tsCryptoData retVal = obj->encryptData(session, tscrypto::tsCryptoString(*Nan::Utf8String(sourceData)).Base64ToData(), compress->BooleanValue());
 			info.GetReturnValue().Set(Nan::New(retVal.ToBase64().c_str()).ToLocalChecked());
 		}
 	}
-	catch (tsAscii& ex)
+	catch (tscrypto::tsCryptoString& ex)
 	{
 		Nan::ThrowError(ex.c_str());
 		return;
@@ -260,10 +261,10 @@ Nan::NAN_METHOD_RETURN_TYPE Favorite::EncryptString(Nan::NAN_METHOD_ARGS_TYPE in
 	auto compress = Nan::To<v8::Boolean>(info[2]).ToLocalChecked();
 	try
 	{
-		tsData retVal = obj->encryptData(session, tsAscii(*Nan::Utf8String(sourceFile)).ToUTF8Data(), compress->BooleanValue());
+		tscrypto::tsCryptoData retVal = obj->encryptData(session, tscrypto::tsCryptoString(*Nan::Utf8String(sourceFile)).ToUTF8Data(), compress->BooleanValue());
 		info.GetReturnValue().Set(Nan::New<v8::String>(retVal.ToBase64().c_str()).ToLocalChecked());
 	}
-	catch (tsAscii& ex)
+	catch (tscrypto::tsCryptoString& ex)
 	{
 		Nan::ThrowError(ex.c_str());
 		return;

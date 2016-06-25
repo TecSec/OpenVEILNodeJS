@@ -40,7 +40,7 @@ class StatusClass : public IFileVEILOperationStatus, public tsmod::IObject
 {
 public:
 	StatusClass() {}
-	virtual bool Status(const tsAscii& taskName, int taskNumber, int ofTaskCount, int taskPercentageDone)
+	virtual bool Status(const tscrypto::tsCryptoString& taskName, int taskNumber, int ofTaskCount, int taskPercentageDone)
 	{
 		//if (g_doStatus)
 		//{
@@ -48,7 +48,7 @@ public:
 		//}
 		return true;
 	}
-	virtual void    FailureReason(const tsAscii&failureText)
+	virtual void    FailureReason(const tscrypto::tsCryptoString&failureText)
 	{
 		//ERROR(failureText);
 	}
@@ -114,7 +114,7 @@ private:
 			return;
 		_value->Close();
 	}
-	LoginStatus login(const tsAscii& pin)
+	LoginStatus login(const tscrypto::tsCryptoString& pin)
 	{
 		if (!isReady())
 			return loginStatus_NoServer;
@@ -132,9 +132,9 @@ private:
 			return true;
 		return _value->Logout();
 	}
-	//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsData&)> headerCallback, tsData &WorkingKey);
-	//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsData &WorkingKey);
-	tsAscii getProfile()
+	//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tscrypto::tsCryptoData&)> headerCallback, tscrypto::tsCryptoData &WorkingKey);
+	//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tscrypto::tsCryptoData &WorkingKey);
+	tscrypto::tsCryptoString getProfile()
 	{
 		if (!isReady())
 			return "";
@@ -166,16 +166,16 @@ private:
 
 		return new Session(_value->Duplicate());
 	}
-	bool encryptFileUsingFavorite(Favorite* fav, const tsAscii& sourceFile, bool compress, const tsAscii& encryptedFile)
+	bool encryptFileUsingFavorite(Favorite* fav, const tscrypto::tsCryptoString& sourceFile, bool compress, const tscrypto::tsCryptoString& encryptedFile)
 	{
 		if (!isReady())
 			return false;
 		return fav->encryptFile(this, sourceFile, compress, encryptedFile);
 	}
-	bool decryptFile(const tsAscii& encryptedFile, const tsAscii& decryptedFile)
+	bool decryptFile(const tscrypto::tsCryptoString& encryptedFile, const tscrypto::tsCryptoString& decryptedFile)
 	{
 		if (!isReady())
-			throw tsAscii("Session not ready");
+			throw tscrypto::tsCryptoString("Session not ready");
 
 		if (!InitializeCmsHeader())
 			return false;
@@ -185,7 +185,7 @@ private:
 
 		if (xp_GetFileAttributes(encryptedFile) == XP_INVALID_FILE_ATTRIBUTES || xp_IsDirectory(encryptedFile))
 		{
-			throw (tsAscii() << "File -> " << encryptedFile << " <- does not exist Decrypt operation aborted");
+			throw (tscrypto::tsCryptoString() << "File -> " << encryptedFile << " <- does not exist Decrypt operation aborted");
 		}
 
 		status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
@@ -194,33 +194,33 @@ private:
 			!(fileOps->SetStatusInterface(status)) ||
 			!(fileOps->SetSession(handle())))
 		{
-			throw tsAscii("An error occurred while building the file decryptor.  The OpenVEIL installation may be damaged.");
+			throw tscrypto::tsCryptoString("An error occurred while building the file decryptor.  The OpenVEIL installation may be damaged.");
 		}
 
 		if (!fileOps->DecryptFileAndStreams(encryptedFile, decryptedFile))
 		{
-			throw tsAscii("Decrypt failed.");
+			throw tscrypto::tsCryptoString("Decrypt failed.");
 		}
 
 		return true;
 	}
-	tsData encryptDataUsingFavorite(Favorite* fav, const tsData& sourceData, bool compress)
+	tscrypto::tsCryptoData encryptDataUsingFavorite(Favorite* fav, const tscrypto::tsCryptoData& sourceData, bool compress)
 	{
 		if (!isReady())
-			throw tsAscii("Session not ready");
+			throw tscrypto::tsCryptoString("Session not ready");
 		return fav->encryptData(this, sourceData, compress);
 	}
-	tsData decryptData(const tsData& encryptedData)
+	tscrypto::tsCryptoData decryptData(const tscrypto::tsCryptoData& encryptedData)
 	{
 		if (!isReady())
-			throw tsAscii("Session not ready");
+			throw tscrypto::tsCryptoString("Session not ready");
 
 		if (!InitializeCmsHeader())
-			return tsData();
+			return tscrypto::tsCryptoData();
 
 		std::shared_ptr<IFileVEILOperations> fileOps;
 		std::shared_ptr<IFileVEILOperationStatus> status;
-		tsData destData;
+		tscrypto::tsCryptoData destData;
 
 		status = ::ServiceLocator()->Finish<IFileVEILOperationStatus>(new StatusClass());
 
@@ -228,12 +228,12 @@ private:
 			!(fileOps->SetStatusInterface(status)) ||
 			!(fileOps->SetSession(handle())))
 		{
-			throw tsAscii("An error occurred while building the file decryptor.  The OpenVEIL installation may be damaged.");
+			throw tscrypto::tsCryptoString("An error occurred while building the file decryptor.  The OpenVEIL installation may be damaged.");
 		}
 
 		if (!fileOps->DecryptCryptoData(encryptedData, destData))
 		{
-			throw tsAscii("Decrypt failed.");
+			throw tscrypto::tsCryptoString("Decrypt failed.");
 		}
 
 		return destData;
@@ -348,7 +348,7 @@ private:
 			bool retVal = fav->encryptFile(obj, *Nan::Utf8String(sourceFile), compress->BooleanValue(), *Nan::Utf8String(destFile));
 			info.GetReturnValue().Set(retVal);
 		}
-		catch (tsAscii& ex)
+		catch (tscrypto::tsCryptoString& ex)
 		{
 			Nan::ThrowError(ex.c_str());
 			return;
@@ -371,7 +371,7 @@ private:
 			bool retVal = obj->decryptFile(*Nan::Utf8String(sourceFile), *Nan::Utf8String(destFile));
 			info.GetReturnValue().Set(retVal);
 		}
-		catch (tsAscii& ex)
+		catch (tscrypto::tsCryptoString& ex)
 		{
 			Nan::ThrowError(ex.c_str());
 			return;
@@ -398,18 +398,18 @@ private:
 				char* content = node::Buffer::Data(sourceData);
 				int contentlength = node::Buffer::Length(sourceData);
 
-				tsData retVal = fav->encryptData(obj, tsData((uint8_t*)content, contentlength), compress->BooleanValue());
+				tscrypto::tsCryptoData retVal = fav->encryptData(obj, tscrypto::tsCryptoData((uint8_t*)content, contentlength), compress->BooleanValue());
 				info.GetReturnValue().Set(Nan::CopyBuffer((char*)retVal.c_str(), retVal.size()).ToLocalChecked());
 			}
 			else
 			{
 				auto sourceData = Nan::To<v8::String>(info[1]).ToLocalChecked();
 				auto compress = Nan::To<v8::Boolean>(info[2]).ToLocalChecked();
-				tsData retVal = fav->encryptData(obj, tsAscii(*Nan::Utf8String(sourceData)).Base64ToData(), compress->BooleanValue());
+				tscrypto::tsCryptoData retVal = fav->encryptData(obj, tscrypto::tsCryptoString(*Nan::Utf8String(sourceData)).Base64ToData(), compress->BooleanValue());
 				info.GetReturnValue().Set(Nan::New<v8::String>(retVal.ToBase64().c_str()).ToLocalChecked());
 			}
 		}
-		catch (tsAscii& ex)
+		catch (tscrypto::tsCryptoString& ex)
 		{
 			Nan::ThrowError(ex.c_str());
 			return;
@@ -430,10 +430,10 @@ private:
 		auto compress = Nan::To<v8::Boolean>(info[2]).ToLocalChecked();
 		try
 		{
-			tsData retVal = fav->encryptData(obj, tsAscii(*Nan::Utf8String(sourceData)).ToUTF8Data(), compress->BooleanValue());
+			tscrypto::tsCryptoData retVal = fav->encryptData(obj, tscrypto::tsCryptoString(*Nan::Utf8String(sourceData)).ToUTF8Data(), compress->BooleanValue());
 			info.GetReturnValue().Set(Nan::New<v8::String>(retVal.ToBase64().c_str()).ToLocalChecked());
 		}
-		catch (tsAscii& ex)
+		catch (tscrypto::tsCryptoString& ex)
 		{
 			Nan::ThrowError(ex.c_str());
 			return;
@@ -457,18 +457,18 @@ private:
 				char* content = node::Buffer::Data(sourceData);
 				int contentlength = node::Buffer::Length(sourceData);
 
-				tsData retVal = obj->decryptData(tsData((uint8_t*)content, contentlength));
+				tscrypto::tsCryptoData retVal = obj->decryptData(tscrypto::tsCryptoData((uint8_t*)content, contentlength));
 				info.GetReturnValue().Set(Nan::CopyBuffer((char*)retVal.c_str(), retVal.size()).ToLocalChecked());
 			}
 			else
 			{
 				auto sourceData = Nan::To<v8::String>(info[0]).ToLocalChecked();
 
-				tsData retVal = obj->decryptData(tsAscii(*Nan::Utf8String(sourceData)).Base64ToData());
+				tscrypto::tsCryptoData retVal = obj->decryptData(tscrypto::tsCryptoString(*Nan::Utf8String(sourceData)).Base64ToData());
 				info.GetReturnValue().Set(Nan::New<v8::String>(retVal.ToBase64().c_str()).ToLocalChecked());
 			}
 		}
-		catch (tsAscii& ex)
+		catch (tscrypto::tsCryptoString& ex)
 		{
 			Nan::ThrowError(ex.c_str());
 			return;
@@ -487,10 +487,10 @@ private:
 
 		try
 		{
-			tsData retVal = obj->decryptData(tsAscii(*Nan::Utf8String(sourceData)).Base64ToData());
+			tscrypto::tsCryptoData retVal = obj->decryptData(tscrypto::tsCryptoString(*Nan::Utf8String(sourceData)).Base64ToData());
 			info.GetReturnValue().Set(Nan::New<v8::String>(retVal.ToUtf8String().c_str()).ToLocalChecked());
 		}
-		catch (tsAscii& ex)
+		catch (tscrypto::tsCryptoString& ex)
 		{
 			Nan::ThrowError(ex.c_str());
 			return;
